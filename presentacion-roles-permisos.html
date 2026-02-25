@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Implementación Técnica de Roles y Permisos en SIGER PRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #0D1117;
+            color: #FFFFFF;
+            overflow: hidden;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide {
+            display: none;
+            width: 100%;
+            height: calc(100vh - 80px);
+            background: linear-gradient(135deg, #0D1117 0%, #161B22 100%);
+            padding: 60px 80px;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .slide-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 40px;
+            letter-spacing: -1px;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .slide-text {
+            font-size: 18px;
+            color: #C9D1D9;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background: rgba(35, 134, 54, 0.05);
+            border: 1px solid rgba(35, 134, 54, 0.2);
+            border-left: 3px solid #238636;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            color: #C9D1D9;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .matrix {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        .matrix th, .matrix td {
+            border: 1px solid rgba(35, 134, 54, 0.2);
+            padding: 12px;
+            text-align: center;
+        }
+
+        .matrix th {
+            background: rgba(35, 134, 54, 0.1);
+            color: #238636;
+            font-weight: 600;
+        }
+
+        .matrix td {
+            color: #C9D1D9;
+        }
+
+        .matrix .check {
+            color: #238636;
+            font-weight: 700;
+        }
+
+        .matrix .cross {
+            color: #8B949E;
+            font-weight: 700;
+        }
+
+        .list-item {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            margin: 10px 0;
+        }
+
+        .list-dot {
+            width: 6px;
+            height: 6px;
+            background: #238636;
+            border-radius: 50%;
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .component-box {
+            background: rgba(35, 134, 54, 0.05);
+            border: 1px solid rgba(35, 134, 54, 0.2);
+            padding: 20px;
+        }
+
+        .component-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: #238636;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .component-text {
+            font-size: 16px;
+            color: #C9D1D9;
+            line-height: 1.5;
+        }
+
+        .controls {
+            height: 80px;
+            background: #0D1117;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 80px;
+            border-top: 1px solid rgba(35, 134, 54, 0.2);
+        }
+
+        .nav-button {
+            background: transparent;
+            border: 1px solid #238636;
+            color: #238636;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: rgba(35, 134, 54, 0.1);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .slide-counter {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 14px;
+            color: #238636;
+            font-weight: 600;
+        }
+
+        .slide-number {
+            color: #C9D1D9;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin: 20px 0;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .flow-diagram {
+            background: rgba(35, 134, 54, 0.05);
+            border: 1px solid rgba(35, 134, 54, 0.2);
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 14px;
+            color: #C9D1D9;
+            line-height: 2;
+            text-align: center;
+        }
+
+        .highlight {
+            color: #238636;
+            font-weight: 600;
+        }
+
+        h2 {
+            font-size: 24px;
+            color: #238636;
+            margin: 20px 0 10px 0;
+            font-weight: 700;
+        }
+
+        h3 {
+            font-size: 18px;
+            color: #C9D1D9;
+            margin: 15px 0 10px 0;
+            font-weight: 600;
+        }
+
+        .agenda-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin: 20px 0;
+        }
+
+        .agenda-item {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .agenda-number {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 20px;
+            font-weight: 600;
+            color: #238636;
+            min-width: 30px;
+        }
+
+        .agenda-text {
+            font-size: 16px;
+            color: #C9D1D9;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        <!-- Slide 1: Portada -->
+        <div class="slide active">
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 30px;">
+                <h1 class="slide-title">Implementación Técnica de Roles y Permisos</h1>
+                <p class="slide-text" style="font-size: 24px;">Arquitectura de Control de Acceso y Seguridad en SIGER PRO</p>
+                <p class="slide-text" style="margin-top: 100px; color: #238636; font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600;">SIGER PRO v5.0 | Febrero 2026</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Agenda -->
+        <div class="slide">
+            <h1 class="slide-title">Agenda</h1>
+            <div class="slide-content">
+                <div class="agenda-grid">
+                    <div>
+                        <div class="agenda-item">
+                            <div class="agenda-number">1</div>
+                            <div class="agenda-text">Introducción a Control de Acceso</div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="agenda-number">2</div>
+                            <div class="agenda-text">Estructura de Roles en SIGER PRO</div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="agenda-number">3</div>
+                            <div class="agenda-text">Matriz de Permisos Detallada</div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="agenda-number">4</div>
+                            <div class="agenda-text">Implementación en Base de Datos</div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="agenda-number">5</div>
+                            <div class="agenda-text">Implementación en Backend (tRPC)</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="agenda-item">
+                            <div class="agenda-number">6</div>
+                            <div class="agenda-text">Implementación en Frontend (React)</div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="agenda-number">7</div>
+                            <div class="agenda-text">Auditoría y Trazabilidad</div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="agenda-number">8</div>
+                            <div class="agenda-text">Mejores Prácticas de Seguridad</div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="agenda-number">9</div>
+                            <div class="agenda-text">Casos de Uso Prácticos</div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="agenda-number">10</div>
+                            <div class="agenda-text">Preguntas y Discusión</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: ¿Qué es Control de Acceso? -->
+        <div class="slide">
+            <h1 class="slide-title">¿Qué es Control de Acceso?</h1>
+            <div class="slide-content">
+                <div class="slide-text" style="border-left: 3px solid #238636; padding-left: 20px; margin-bottom: 30px;">
+                    Control de Acceso es el mecanismo que determina qué usuarios pueden realizar qué acciones en qué recursos.
+                </div>
+                <h2>Componentes Clave</h2>
+                <div class="component-grid">
+                    <div class="component-box">
+                        <div class="component-label">Autenticación</div>
+                        <div class="component-text">¿Quién eres?</div>
+                        <div class="slide-text" style="font-size: 14px; color: #8B949E; margin-top: 10px;">Verificación de identidad mediante login</div>
+                    </div>
+                    <div class="component-box">
+                        <div class="component-label">Autorización</div>
+                        <div class="component-text">¿Qué puedes hacer?</div>
+                        <div class="slide-text" style="font-size: 14px; color: #8B949E; margin-top: 10px;">Asignación de permisos según rol</div>
+                    </div>
+                    <div class="component-box">
+                        <div class="component-label">Auditoría</div>
+                        <div class="component-text">¿Qué hiciste?</div>
+                        <div class="slide-text" style="font-size: 14px; color: #8B949E; margin-top: 10px;">Registro de todas las acciones</div>
+                    </div>
+                </div>
+                <h2>Principios Fundamentales</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Principio de Menor Privilegio: Asignar solo permisos necesarios</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Separación de Responsabilidades: Diferentes usuarios, diferentes roles</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Trazabilidad Completa: Registrar todas las acciones realizadas</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Los 3 Roles de SIGER PRO -->
+        <div class="slide">
+            <h1 class="slide-title">Los 3 Roles de SIGER PRO</h1>
+            <div class="slide-content">
+                <h2>Estructura Jerárquica</h2>
+                <div class="flow-diagram">
+                    SUPER_ADMIN → ADMINISTRADOR → AUDITOR
+                </div>
+                <h2>Características de Cada Rol</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">SUPER_ADMIN:</span> Control total del sistema, gestión de usuarios, importación de datos</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">ADMINISTRADOR:</span> Gestión de evaluaciones, creación de reportes, auditoría limitada</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">AUDITOR:</span> Revisión de solo lectura, acceso a bitácora completa, exportación de datos</span>
+                </div>
+                <h2>Estándar OACI</h2>
+                <div class="slide-text">Basado en recomendaciones de seguridad operacional aeronáutica para gestión de riesgos</div>
+            </div>
+        </div>
+
+        <!-- Slide 5: SUPER_ADMIN - Permisos Completos -->
+        <div class="slide">
+            <h1 class="slide-title">SUPER_ADMIN - Permisos Completos</h1>
+            <div class="slide-content">
+                <div class="two-column">
+                    <div class="column">
+                        <h3>Evaluaciones de Riesgos</h3>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">Crear, Leer, Editar, Eliminar</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">Cambiar estado y reasignar</span>
+                        </div>
+                        <h3>Reportes</h3>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">Crear, generar, editar, descargar</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">Programar generación automática</span>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <h3>Auditoría</h3>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">Ver bitácora completa</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">Exportar registros de auditoría</span>
+                        </div>
+                        <h3>Sistema</h3>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">Gestionar usuarios y roles</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">Importar/Exportar datos</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">Configurar parámetros</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: ADMINISTRADOR - Permisos Limitados -->
+        <div class="slide">
+            <h1 class="slide-title">ADMINISTRADOR - Permisos Limitados</h1>
+            <div class="slide-content">
+                <div class="two-column">
+                    <div class="column">
+                        <h3>Evaluaciones de Riesgos</h3>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text"><span class="highlight">✓</span> Crear evaluaciones</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text"><span class="highlight">✓</span> Editar evaluaciones propias</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text"><span class="highlight">✓</span> Ver todas las evaluaciones</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">✗ Editar evaluaciones de otros</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">✗ Eliminar evaluaciones</span>
+                        </div>
+                        <h3>Reportes</h3>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text"><span class="highlight">✓</span> Crear y generar reportes</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">✗ Editar plantillas</span>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <h3>Auditoría</h3>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text"><span class="highlight">✓</span> Ver cambios propios</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">✗ Ver bitácora completa</span>
+                        </div>
+                        <h3>Sistema</h3>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">✗ Gestionar usuarios</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">✗ Importar datos</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">✗ Configurar parámetros</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: AUDITOR - Solo Lectura -->
+        <div class="slide">
+            <h1 class="slide-title">AUDITOR - Solo Lectura</h1>
+            <div class="slide-content">
+                <div class="two-column">
+                    <div class="column">
+                        <h3>Evaluaciones de Riesgos</h3>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text"><span class="highlight">✓</span> Leer todas las evaluaciones</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">✗ Crear, editar, eliminar</span>
+                        </div>
+                        <h3>Reportes</h3>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text"><span class="highlight">✓</span> Ver y descargar reportes</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">✗ Crear o generar nuevos</span>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <h3>Auditoría</h3>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text"><span class="highlight">✓</span> Ver bitácora completa</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text"><span class="highlight">✓</span> Exportar para análisis</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">✗ Agregar comentarios</span>
+                        </div>
+                        <h3>Sistema</h3>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">✗ Gestionar usuarios</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-dot"></div>
+                            <span class="slide-text">✗ Modificar datos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Matriz de Permisos - Evaluaciones -->
+        <div class="slide">
+            <h1 class="slide-title">Matriz de Permisos - Evaluaciones</h1>
+            <div class="slide-content">
+                <table class="matrix">
+                    <thead>
+                        <tr>
+                            <th>Acción</th>
+                            <th>SUPER_ADMIN</th>
+                            <th>ADMINISTRADOR</th>
+                            <th>AUDITOR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="text-align: left;">Crear</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="cross">✗</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left;">Leer Propia</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left;">Leer de Otros</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left;">Editar Propia</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="cross">✗</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left;">Editar de Otros</td>
+                            <td class="check">✓</td>
+                            <td class="cross">✗</td>
+                            <td class="cross">✗</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left;">Eliminar</td>
+                            <td class="check">✓</td>
+                            <td class="cross">✗</td>
+                            <td class="cross">✗</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left;">Cambiar Estado</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓*</td>
+                            <td class="cross">✗</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left;">Reasignar</td>
+                            <td class="check">✓</td>
+                            <td class="cross">✗</td>
+                            <td class="cross">✗</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="slide-text" style="font-size: 14px; color: #8B949E; margin-top: 20px;">* Solo evaluaciones propias</div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Matriz de Permisos - Reportes -->
+        <div class="slide">
+            <h1 class="slide-title">Matriz de Permisos - Reportes</h1>
+            <div class="slide-content">
+                <table class="matrix">
+                    <thead>
+                        <tr>
+                            <th>Acción</th>
+                            <th>SUPER_ADMIN</th>
+                            <th>ADMINISTRADOR</th>
+                            <th>AUDITOR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="text-align: left;">Crear Manual</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="cross">✗</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left;">Generar Automático</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="cross">✗</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left;">Ver Reportes</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left;">Descargar PDF/Excel</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                            <td class="check">✓</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left;">Editar Plantillas</td>
+                            <td class="check">✓</td>
+                            <td class="cross">✗</td>
+                            <td class="cross">✗</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left;">Programar Generación</td>
+                            <td class="check">✓</td>
+                            <td class="cross">✗</td>
+                            <td class="cross">✗</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Slide 10: Implementación en BD - Tabla Usuarios -->
+        <div class="slide">
+            <h1 class="slide-title">Implementación en BD - Tabla Usuarios</h1>
+            <div class="slide-content">
+                <h2>Estructura SQL</h2>
+                <div class="code-block">CREATE TABLE usuarios (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  openId VARCHAR(64) UNIQUE NOT NULL,
+  nombre TEXT,
+  correo VARCHAR(320),
+  role ENUM('SUPER_ADMIN', 'ADMINISTRADOR', 'AUDITOR'),
+  activo BOOLEAN DEFAULT TRUE,
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);</div>
+                <h2>Características</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Rol almacenado en cada usuario</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Enum para valores válidos (previene errores)</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Campo activo para desactivar usuarios</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">openId único para integración OAuth</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Tabla de Bitácora de Auditoría -->
+        <div class="slide">
+            <h1 class="slide-title">Tabla de Bitácora de Auditoría</h1>
+            <div class="slide-content">
+                <h2>Estructura SQL</h2>
+                <div class="code-block">CREATE TABLE bitacora (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  usuario_id INT NOT NULL,
+  accion VARCHAR(100),
+  tabla_afectada VARCHAR(50),
+  registro_id INT,
+  cambios JSON,
+  fecha_accion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+);</div>
+                <h2>Información Registrada</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">Quién:</span> usuario_id (usuario que realizó la acción)</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">Qué:</span> accion (CREATE, READ, UPDATE, DELETE)</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">Dónde:</span> tabla_afectada y registro_id</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">Cambios:</span> JSON con valores antiguos y nuevos</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">Cuándo:</span> fecha_accion (timestamp)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Backend - Procedimientos Protegidos -->
+        <div class="slide">
+            <h1 class="slide-title">Backend - Procedimientos Protegidos</h1>
+            <div class="slide-content">
+                <h2>Procedimiento para SUPER_ADMIN</h2>
+                <div class="code-block">export const adminProcedure = protectedProcedure
+  .use(({ ctx, next }) => {
+    if (ctx.user.role !== 'SUPER_ADMIN') {
+      throw new TRPCError({ code: 'FORBIDDEN' });
+    }
+    return next({ ctx });
+  });</div>
+                <h2>Procedimiento para SUPER_ADMIN y ADMINISTRADOR</h2>
+                <div class="code-block">export const managerProcedure = protectedProcedure
+  .use(({ ctx, next }) => {
+    if (!['SUPER_ADMIN', 'ADMINISTRADOR'].includes(ctx.user.role)) {
+      throw new TRPCError({ code: 'FORBIDDEN' });
+    }
+    return next({ ctx });
+  });</div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Ejemplo - Eliminar Evaluación -->
+        <div class="slide">
+            <h1 class="slide-title">Ejemplo - Eliminar Evaluación</h1>
+            <div class="slide-content">
+                <h2>Procedimiento tRPC (Solo SUPER_ADMIN)</h2>
+                <div class="code-block">delete: adminProcedure
+  .input(z.object({ id: z.number() }))
+  .mutation(async ({ input, ctx }) => {
+    // Solo SUPER_ADMIN puede ejecutar
+    await db.delete(evaluaciones)
+      .where(eq(evaluaciones.id, input.id));
+    
+    // Registrar en bitácora
+    await db.insert(bitacora).values({
+      usuario_id: ctx.user.id,
+      accion: 'DELETE',
+      tabla_afectada: 'evaluaciones',
+      registro_id: input.id,
+      fecha_accion: new Date(),
+    });
+  }),</div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Ejemplo - Crear Evaluación -->
+        <div class="slide">
+            <h1 class="slide-title">Ejemplo - Crear Evaluación</h1>
+            <div class="slide-content">
+                <h2>Procedimiento tRPC (SUPER_ADMIN y ADMINISTRADOR)</h2>
+                <div class="code-block">create: managerProcedure
+  .input(z.object({
+    fecha: z.string(),
+    tipoOcurrencia: z.string(),
+    probabilidad: z.number(),
+    severidad: z.string(),
+  }))
+  .mutation(async ({ input, ctx }) => {
+    const evaluation = await db.insert(evaluaciones).values({
+      ...input,
+      creadoPor: ctx.user.id,
+      estado: 'ABIERTO',
+    });
+    
+    // Registrar en bitácora
+    await registrarEnBitacora(ctx.user.id, 'CREATE', 
+      'evaluaciones', evaluation.id);
+    
+    return evaluation;
+  }),</div>
+            </div>
+        </div>
+
+        <!-- Slide 15: Frontend - Hooks de Permisos -->
+        <div class="slide">
+            <h1 class="slide-title">Frontend - Hooks de Permisos</h1>
+            <div class="slide-content">
+                <h2>React Hooks para Verificar Permisos</h2>
+                <div class="code-block">function useCanDelete() {
+  const { user } = useAuth();
+  return user?.role === 'SUPER_ADMIN';
+}
+
+function useCanEdit() {
+  const { user } = useAuth();
+  return ['SUPER_ADMIN', 'ADMINISTRADOR']
+    .includes(user?.role);
+}
+
+function useCanCreate() {
+  const { user } = useAuth();
+  return ['SUPER_ADMIN', 'ADMINISTRADOR']
+    .includes(user?.role);
+}</div>
+            </div>
+        </div>
+
+        <!-- Slide 16: Componente con Control de Acceso -->
+        <div class="slide">
+            <h1 class="slide-title">Componente con Control de Acceso</h1>
+            <div class="slide-content">
+                <h2>Componente React</h2>
+                <div class="code-block">export function EvaluacionActions({ evaluacionId }) {
+  const { user } = useAuth();
+  const canDelete = user?.role === 'SUPER_ADMIN';
+  const canEdit = ['SUPER_ADMIN', 'ADMINISTRADOR']
+    .includes(user?.role);
+
+  return (
+    &lt;div&gt;
+      {canEdit && (
+        &lt;Button onClick={() => editarEvaluacion(evaluacionId)}&gt;
+          Editar
+        &lt;/Button&gt;
+      )}
+      {canDelete && (
+        &lt;Button variant="destructive" 
+          onClick={() => eliminarEvaluacion(evaluacionId)}&gt;
+          Eliminar
+        &lt;/Button&gt;
+      )}
+    &lt;/div&gt;
+  );
+}</div>
+            </div>
+        </div>
+
+        <!-- Slide 17: Flujo de Autorización -->
+        <div class="slide">
+            <h1 class="slide-title">Flujo de Autorización</h1>
+            <div class="slide-content">
+                <div class="flow-diagram" style="line-height: 2.5; font-size: 16px;">
+                    Usuario intenta realizar acción<br>
+                    ↓<br>
+                    ¿Está autenticado?<br>
+                    NO → Redirigir a login<br>
+                    SÍ ↓<br>
+                    ¿Tiene el rol requerido?<br>
+                    NO → Error 403 FORBIDDEN<br>
+                    SÍ ↓<br>
+                    ¿Es propietario del recurso?<br>
+                    NO (si aplica) → Error 403 FORBIDDEN<br>
+                    SÍ ↓<br>
+                    Ejecutar acción<br>
+                    ↓<br>
+                    Registrar en bitácora
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 18: Auditoría - Ejemplo de Registro -->
+        <div class="slide">
+            <h1 class="slide-title">Auditoría - Ejemplo de Registro</h1>
+            <div class="slide-content">
+                <h2>Entrada JSON en Bitácora</h2>
+                <div class="code-block">{
+  "id": 1,
+  "usuario_id": 5,
+  "accion": "UPDATE",
+  "tabla_afectada": "evaluaciones",
+  "registro_id": 42,
+  "cambios": {
+    "estado": {
+      "old": "ABIERTO",
+      "new": "CERRADO"
+    },
+    "actualizado_por": {
+      "old": null,
+      "new": 5
+    }
+  },
+  "fecha_accion": "2026-02-18T19:30:00Z"
+}</div>
+            </div>
+        </div>
+
+        <!-- Slide 19: Auditoría - Consultas Útiles -->
+        <div class="slide">
+            <h1 class="slide-title">Auditoría - Consultas Útiles</h1>
+            <div class="slide-content">
+                <h2>Ver acciones de un usuario</h2>
+                <div class="code-block">SELECT * FROM bitacora 
+WHERE usuario_id = 5 
+ORDER BY fecha_accion DESC;</div>
+                <h2>Ver cambios en una evaluación específica</h2>
+                <div class="code-block">SELECT * FROM bitacora 
+WHERE tabla_afectada = 'evaluaciones' 
+AND registro_id = 42;</div>
+                <h2>Ver eliminaciones en el último mes</h2>
+                <div class="code-block">SELECT * FROM bitacora 
+WHERE accion = 'DELETE' 
+AND fecha_accion >= DATE_SUB(NOW(), INTERVAL 1 MONTH);</div>
+            </div>
+        </div>
+
+        <!-- Slide 20: Mejores Prácticas - Menor Privilegio -->
+        <div class="slide">
+            <h1 class="slide-title">Mejores Prácticas - Menor Privilegio</h1>
+            <div class="slide-content">
+                <h2>Concepto</h2>
+                <div class="slide-text">Asigna el rol más bajo que permita al usuario hacer su trabajo.</div>
+                <h2>Ejemplos</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span style="color: #8B949E;">✗</span> Dar SUPER_ADMIN a todos</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">✓</span> ADMINISTRADOR para gestores de evaluaciones</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">✓</span> AUDITOR para revisores</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">✓</span> SUPER_ADMIN solo para administradores de sistema</span>
+                </div>
+                <h2>Beneficios</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Reduce riesgo de errores accidentales</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Limita daño en caso de compromiso de cuenta</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Cumple con estándares de seguridad</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 21: Mejores Prácticas - Separación de Responsabilidades -->
+        <div class="slide">
+            <h1 class="slide-title">Mejores Prácticas - Separación de Responsabilidades</h1>
+            <div class="slide-content">
+                <h2>Concepto</h2>
+                <div class="slide-text">Diferentes usuarios tienen responsabilidades diferentes.</div>
+                <h2>Ejemplo en SIGER PRO</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">ADMINISTRADOR:</span> Crea y edita evaluaciones</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">AUDITOR:</span> Revisa y valida evaluaciones</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">SUPER_ADMIN:</span> Gestiona sistema y usuarios</span>
+                </div>
+                <h2>Ventajas</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Evita conflictos de interés</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Mejora control y auditoría</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Facilita investigación de incidentes</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 22: Mejores Prácticas - Auditoría Continua -->
+        <div class="slide">
+            <h1 class="slide-title">Mejores Prácticas - Auditoría Continua</h1>
+            <div class="slide-content">
+                <h2>Actividades Recomendadas</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Revisar bitácora regularmente (semanal)</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Identificar acciones inusuales o sospechosas</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Investigar cambios no autorizados</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Alertar sobre intentos de acceso denegado</span>
+                </div>
+                <h2>Herramientas Disponibles</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Consultas SQL para análisis</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Reportes automáticos</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Alertas en tiempo real</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 23: Mejores Prácticas - Rotación de Credenciales -->
+        <div class="slide">
+            <h1 class="slide-title">Mejores Prácticas - Rotación de Credenciales</h1>
+            <div class="slide-content">
+                <h2>Medidas de Seguridad</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Cambiar contraseñas regularmente (cada 90 días)</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Desactivar usuarios inactivos (después de 30 días)</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Revocar acceso cuando sea necesario</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Revisar roles asignados periódicamente (mensual)</span>
+                </div>
+                <h2>Frecuencia Recomendada</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">Cambio de contraseña:</span> Cada 90 días</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">Revisión de roles:</span> Mensual</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">Auditoría de acceso:</span> Semanal</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 24: Caso de Uso 1 - Nuevo Administrador -->
+        <div class="slide">
+            <h1 class="slide-title">Caso de Uso 1 - Nuevo Administrador</h1>
+            <div class="slide-content">
+                <h2>Escenario</h2>
+                <div class="slide-text">Se contrata a un nuevo gestor de evaluaciones de riesgos.</div>
+                <h2>Pasos</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">1. SUPER_ADMIN crea usuario con rol ADMINISTRADOR</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">2. Usuario se autentica con OAuth</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">3. Sistema asigna permisos automáticamente</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">4. Usuario puede crear y editar evaluaciones</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">5. Todas las acciones se registran en bitácora</span>
+                </div>
+                <h2>Resultado</h2>
+                <div class="slide-text" style="color: #238636; font-weight: 600;">✓ Acceso controlado y auditable</div>
+            </div>
+        </div>
+
+        <!-- Slide 25: Caso de Uso 2 - Auditoría de Cambios -->
+        <div class="slide">
+            <h1 class="slide-title">Caso de Uso 2 - Auditoría de Cambios</h1>
+            <div class="slide-content">
+                <h2>Escenario</h2>
+                <div class="slide-text">Se necesita investigar quién cambió una evaluación crítica.</div>
+                <h2>Pasos</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">1. AUDITOR consulta bitácora para evaluación #42</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">2. Ve que usuario #5 cambió estado a CERRADO</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">3. Consulta otros cambios del usuario #5</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">4. Identifica patrón de actividad</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">5. Reporta hallazgos a SUPER_ADMIN</span>
+                </div>
+                <h2>Resultado</h2>
+                <div class="slide-text" style="color: #238636; font-weight: 600;">✓ Trazabilidad completa de cambios</div>
+            </div>
+        </div>
+
+        <!-- Slide 26: Caso de Uso 3 - Revocar Acceso -->
+        <div class="slide">
+            <h1 class="slide-title">Caso de Uso 3 - Revocar Acceso</h1>
+            <div class="slide-content">
+                <h2>Escenario</h2>
+                <div class="slide-text">Un empleado se va de la empresa.</div>
+                <h2>Pasos</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">1. SUPER_ADMIN desactiva usuario en BD</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">2. Usuario ya no puede autenticarse</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">3. Acciones futuras son bloqueadas automáticamente</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">4. Bitácora muestra cuándo fue desactivado</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">5. Datos históricos se mantienen para auditoría</span>
+                </div>
+                <h2>Resultado</h2>
+                <div class="slide-text" style="color: #238636; font-weight: 600;">✓ Acceso revocado, auditoría preservada</div>
+            </div>
+        </div>
+
+        <!-- Slide 27: Seguridad - Protección contra Ataques -->
+        <div class="slide">
+            <h1 class="slide-title">Seguridad - Protección contra Ataques</h1>
+            <div class="slide-content">
+                <h2>Ataques Comunes</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Escalación de privilegios (usuario intenta acceder como SUPER_ADMIN)</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Acceso no autorizado (intentar ver datos de otros)</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Modificación no autorizada (cambiar evaluaciones ajenas)</span>
+                </div>
+                <h2>Defensas en SIGER PRO</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Verificación de rol en cada operación</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Auditoría completa de cambios</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Separación de responsabilidades</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Principio de menor privilegio</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 28: Integración con OAuth -->
+        <div class="slide">
+            <h1 class="slide-title">Integración con OAuth</h1>
+            <div class="slide-content">
+                <h2>Flujo de Autenticación</h2>
+                <div class="flow-diagram" style="line-height: 2.2; font-size: 15px;">
+                    1. Usuario intenta acceder<br>
+                    2. Redirige a Manus OAuth<br>
+                    3. Usuario se autentica<br>
+                    4. OAuth devuelve openId y datos<br>
+                    5. Sistema crea/actualiza usuario en BD<br>
+                    6. Asigna rol según configuración
+                </div>
+                <h2>Ventaja</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">✓</span> Autenticación centralizada y segura</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">✓</span> No necesita gestionar contraseñas</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">✓</span> Integración con identidad corporativa</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 29: Monitoreo y Alertas -->
+        <div class="slide">
+            <h1 class="slide-title">Monitoreo y Alertas</h1>
+            <div class="slide-content">
+                <h2>Métricas a Monitorear</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Intentos de acceso denegado (posible ataque)</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Cambios de rol no esperados</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Eliminaciones de evaluaciones críticas</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Acceso a datos sensibles</span>
+                </div>
+                <h2>Alertas Recomendadas</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Múltiples intentos fallidos de login (>3)</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Cambios de rol no esperados</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Acciones de SUPER_ADMIN fuera de horario</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Acceso a evaluaciones críticas por AUDITOR</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 30: Roadmap Futuro -->
+        <div class="slide">
+            <h1 class="slide-title">Roadmap Futuro</h1>
+            <div class="slide-content">
+                <h2>Mejoras Planeadas</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">[ ] Roles personalizados (crear roles a medida)</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">[ ] Permisos a nivel de campo (controlar acceso a campos específicos)</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">[ ] Autenticación multifactor (MFA)</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">[ ] Alertas en tiempo real</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">[ ] Dashboard de auditoría avanzado</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">[ ] Integración con SIEM (Security Information and Event Management)</span>
+                </div>
+                <h2>Objetivo</h2>
+                <div class="slide-text">Mejorar seguridad y cumplimiento normativo OACI</div>
+            </div>
+        </div>
+
+        <!-- Slide 31: Resumen -->
+        <div class="slide">
+            <h1 class="slide-title">Resumen</h1>
+            <div class="slide-content">
+                <h2>Puntos Clave</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">SIGER PRO implementa 3 roles bien definidos</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Permisos granulares por rol y acción</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Auditoría completa de todas las acciones</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Implementación en BD, Backend y Frontend</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">Mejores prácticas de seguridad aplicadas</span>
+                </div>
+                <h2>Beneficios</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">✓</span> Control de acceso robusto</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">✓</span> Trazabilidad completa</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">✓</span> Cumplimiento OACI</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text"><span class="highlight">✓</span> Seguridad operacional</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 32: Preguntas y Discusión -->
+        <div class="slide">
+            <h1 class="slide-title">Preguntas y Discusión</h1>
+            <div class="slide-content">
+                <h2>Temas para Discutir</h2>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">¿Cómo asignar roles a nuevos usuarios?</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">¿Cómo investigar cambios no autorizados?</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">¿Qué hacer si se compromete una cuenta?</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-dot"></div>
+                    <span class="slide-text">¿Cómo escalar privilegios si es necesario?</span>
+                </div>
+                <h2>Contacto</h2>
+                <div class="slide-text">Email: soporte@sigerpro.com<br>Teléfono: +1-XXX-XXX-XXXX<br>Documentación: https://docs.sigerpro.com</div>
+            </div>
+        </div>
+
+        <!-- Slide 33: Gracias -->
+        <div class="slide">
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 30px; text-align: center;">
+                <h1 class="slide-title" style="margin-left: 0; text-align: center;">¡Gracias!</h1>
+                <div class="slide-text" style="font-size: 20px;">La implementación técnica de roles y permisos es fundamental para la seguridad operacional en SIGER PRO.</div>
+                <h2 style="text-align: center;">Próximos Pasos</h2>
+                <div class="slide-text">1. Revisar documentación completa<br>2. Implementar en tu organización<br>3. Entrenar a usuarios<br>4. Monitorear auditoría regularmente</div>
+                <div class="slide-text" style="color: #238636; font-weight: 600; font-size: 20px; margin-top: 40px;">¡Gracias por tu atención!</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="nav-button" id="prevBtn" onclick="changeSlide(-1)">← Anterior</button>
+            <div class="slide-counter">
+                <span id="currentSlide">1</span> / <span id="totalSlides">33</span>
+            </div>
+            <button class="nav-button" id="nextBtn" onclick="changeSlide(1)">Siguiente →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        document.getElementById('totalSlides').textContent = totalSlides;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            document.getElementById('currentSlide').textContent = currentSlide + 1;
+            
+            // Update button states
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function changeSlide(n) {
+            showSlide(currentSlide + n);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && currentSlide > 0) changeSlide(-1);
+            if (e.key === 'ArrowRight' && currentSlide < totalSlides - 1) changeSlide(1);
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGER PRO - Captura de Evaluaciones</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+        }
+        
+        .form-card {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .form-section:last-child {
+            border-bottom: none;
+        }
+        
+        .section-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .required {
+            color: #dc2626;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #1e40af;
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .info-text {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .calculation-box {
+            background: #f0f9ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        
+        .calc-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .calc-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .calc-label {
+            color: #1e40af;
+            font-weight: 500;
+        }
+        
+        .calc-value {
+            font-weight: 600;
+            color: #1e40af;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        
+        .badge-bajo { background: #dcfce7; color: #166534; }
+        .badge-medio { background: #fef08a; color: #713f12; }
+        .badge-alto { background: #fed7aa; color: #92400e; }
+        .badge-critico { background: #fecaca; color: #991b1b; }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #1e40af;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1e3a8a;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #1e40af;
+            border: 2px solid #1e40af;
+        }
+        
+        .btn-secondary:hover {
+            background: #f0f9ff;
+        }
+        
+        .success-message {
+            background: #dcfce7;
+            border: 1px solid #86efac;
+            color: #166534;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .help-box {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .help-box h4 {
+            color: #1e40af;
+            margin-bottom: 8px;
+        }
+        
+        .help-box p {
+            color: #1e3a8a;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        
+        footer {
+            text-align: center;
+            color: #666;
+            margin-top: 40px;
+            padding: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📝 Captura de Nueva Evaluación</h1>
+            <p class="subtitle">Registra un nuevo reporte de riesgo operacional aeronáutico</p>
+        </header>
+        
+        <div class="form-card">
+            <div class="success-message" id="successMsg">
+                ✓ Evaluación registrada exitosamente. Los datos se han guardado localmente.
+            </div>
+            
+            <div class="error-message" id="errorMsg">
+                ✗ Por favor completa todos los campos requeridos.
+            </div>
+            
+            <form id="formCaptura" onsubmit="guardarCaptura(event)">
+                <!-- SECCIÓN 1: INFORMACIÓN GENERAL -->
+                <div class="form-section">
+                    <div class="section-title">📋 Información General</div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fecha">Fecha de Reporte <span class="required">*</span></label>
+                            <input type="date" id="fecha" required>
+                            <div class="info-text">Fecha en que se reportó el incidente</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="numeroReporte">Número de Reporte</label>
+                            <input type="text" id="numeroReporte" placeholder="Auto-generado">
+                            <div class="info-text">Se genera automáticamente</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="formaReporte">Forma de Reporte <span class="required">*</span></label>
+                            <select id="formaReporte" required>
+                                <option value="">Seleccionar forma...</option>
+                                <option value="Verbal">Verbal</option>
+                                <option value="Escrita">Escrita</option>
+                                <option value="Sistema">Sistema (SIGER)</option>
+                                <option value="Email">Email</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reportadoPor">Reportado por</label>
+                            <input type="text" id="reportadoPor" placeholder="Nombre del reportante">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SECCIÓN 2: CLASIFICACIÓN -->
+                <div class="form-section">
+                    <div class="section-title">🏷️ Clasificación</div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tipoOcurrencia">Tipo de Ocurrencia <span class="required">*</span></label>
+                            <select id="tipoOcurrencia" required>
+                                <option value="">Seleccionar tipo...</option>
+                                <option value="Incidente">Incidente</option>
+                                <option value="Hallazgo">Hallazgo</option>
+                                <option value="Observación">Observación</option>
+                                <option value="No Conformidad">No Conformidad</option>
+                                <option value="Desviación">Desviación</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="regulacion">Regulación Aplicable <span class="required">*</span></label>
+                            <select id="regulacion" required>
+                                <option value="">Seleccionar regulación...</option>
+                                <option value="RAC">RAC (Reglamento Aeronáutico Colombiano)</option>
+                                <option value="AIES-SOARG">AIES-SOARG (Autoridad Aeronáutica)</option>
+                                <option value="NSOAM">NSOAM (Normas de Seguridad Operacional)</option>
+                                <option value="OACI">OACI (Organización de Aviación Civil)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SECCIÓN 3: EVALUACIÓN DE RIESGO -->
+                <div class="form-section">
+                    <div class="section-title">⚠️ Evaluación de Riesgo OACI</div>
+                    
+                    <div class="help-box">
+                        <h4>Cálculo Automático</h4>
+                        <p>El índice de riesgo inherente se calcula multiplicando Probabilidad × Severidad. La clasificación se determina automáticamente según los estándares OACI.</p>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="probabilidad">Probabilidad <span class="required">*</span></label>
+                            <select id="probabilidad" required onchange="calcularRiesgo()">
+                                <option value="">Seleccionar...</option>
+                                <option value="1">1 - Remota (muy poco probable)</option>
+                                <option value="2">2 - Baja (poco probable)</option>
+                                <option value="3">3 - Media (probable)</option>
+                                <option value="4">4 - Alta (muy probable)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="severidad">Severidad <span class="required">*</span></label>
+                            <select id="severidad" required onchange="calcularRiesgo()">
+                                <option value="">Seleccionar...</option>
+                                <option value="A">A - Muy Baja (sin impacto)</option>
+                                <option value="B">B - Baja (impacto menor)</option>
+                                <option value="C">C - Media (impacto moderado)</option>
+                                <option value="D">D - Alta (impacto significativo)</option>
+                                <option value="E">E - Crítica (impacto catastrófico)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="calculoRiesgo" class="calculation-box" style="display: none;">
+                        <div class="calc-row">
+                            <span class="calc-label">Índice de Riesgo Inherente:</span>
+                            <span class="calc-value" id="indiceCalc">-</span>
+                        </div>
+                        <div class="calc-row">
+                            <span class="calc-label">Clasificación:</span>
+                            <span class="calc-value"><span id="clasificacionCalc" class="badge">-</span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SECCIÓN 4: DESCRIPCIÓN -->
+                <div class="form-section">
+                    <div class="section-title">📝 Descripción Detallada</div>
+                    
+                    <div class="form-group">
+                        <label for="descripcion">Descripción del Incidente <span class="required">*</span></label>
+                        <textarea id="descripcion" required placeholder="Describe detalladamente qué sucedió, cuándo, dónde y quién estuvo involucrado..."></textarea>
+                        <div class="info-text">Sé específico y proporciona todos los detalles relevantes</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="causaRaiz">Causa Raíz Identificada</label>
+                        <textarea id="causaRaiz" placeholder="¿Cuál fue la causa principal del incidente?"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="accionMitigadora">Acción Mitigadora Propuesta <span class="required">*</span></label>
+                        <textarea id="accionMitigadora" required placeholder="Describe la acción propuesta para mitigar o eliminar el riesgo..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- SECCIÓN 5: RESPONSABLES -->
+                <div class="form-section">
+                    <div class="section-title">👥 Responsables</div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="responsableInvestigacion">Responsable de Investigación</label>
+                            <input type="text" id="responsableInvestigacion" placeholder="Nombre del responsable">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="responsableAccion">Responsable de Acción Mitigadora</label>
+                            <input type="text" id="responsableAccion" placeholder="Nombre del responsable">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fechaLimite">Fecha Límite para Acción</label>
+                        <input type="date" id="fechaLimite">
+                    </div>
+                </div>
+                
+                <!-- BOTONES -->
+                <div class="button-group">
+                    <button type="submit" class="btn-primary">💾 Guardar Evaluación</button>
+                    <button type="reset" class="btn-secondary">Limpiar Formulario</button>
+                    <button type="button" class="btn-secondary" onclick="window.location.href='/demo.html'">Volver al Dashboard</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2025 SIGER PRO - Sistema de Gestión de Riesgos Operacionales Aeronáuticos</p>
+    </footer>
+    
+    <script>
+        // Calcular riesgo inherente
+        function calcularRiesgo() {
+            const prob = parseInt(document.getElementById('probabilidad').value) || 0;
+            const sev = document.getElementById('severidad').value;
+            
+            if (prob && sev) {
+                const sevValues = { 'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5 };
+                const indice = prob * sevValues[sev];
+                
+                // Determinar clasificación
+                let clasificacion = 'Bajo';
+                let badgeClass = 'badge-bajo';
+                
+                if (indice >= 16) {
+                    clasificacion = 'Crítico';
+                    badgeClass = 'badge-critico';
+                } else if (indice >= 12) {
+                    clasificacion = 'Alto';
+                    badgeClass = 'badge-alto';
+                } else if (indice >= 6) {
+                    clasificacion = 'Medio';
+                    badgeClass = 'badge-medio';
+                }
+                
+                // Mostrar cálculo
+                document.getElementById('calculoRiesgo').style.display = 'block';
+                document.getElementById('indiceCalc').textContent = indice;
+                document.getElementById('clasificacionCalc').textContent = clasificacion;
+                document.getElementById('clasificacionCalc').className = `badge ${badgeClass}`;
+            } else {
+                document.getElementById('calculoRiesgo').style.display = 'none';
+            }
+        }
+        
+        // Guardar captura
+        function guardarCaptura(event) {
+            event.preventDefault();
+            
+            // Validar campos requeridos
+            const campos = ['fecha', 'formaReporte', 'tipoOcurrencia', 'regulacion', 'probabilidad', 'severidad', 'descripcion', 'accionMitigadora'];
+            const validos = campos.every(c => document.getElementById(c).value);
+            
+            if (!validos) {
+                document.getElementById('errorMsg').classList.add('show');
+                setTimeout(() => document.getElementById('errorMsg').classList.remove('show'), 3000);
+                return;
+            }
+            
+            // Crear objeto de evaluación
+            const evaluacion = {
+                id: Date.now(),
+                fecha: document.getElementById('fecha').value,
+                numeroReporte: document.getElementById('numeroReporte').value || `REP-${Date.now()}`,
+                formaReporte: document.getElementById('formaReporte').value,
+                reportadoPor: document.getElementById('reportadoPor').value,
+                tipoOcurrencia: document.getElementById('tipoOcurrencia').value,
+                regulacion: document.getElementById('regulacion').value,
+                probabilidad: document.getElementById('probabilidad').value,
+                severidad: document.getElementById('severidad').value,
+                indiceRiesgo: (parseInt(document.getElementById('probabilidad').value) * { 'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5 }[document.getElementById('severidad').value]).toString(),
+                descripcion: document.getElementById('descripcion').value,
+                causaRaiz: document.getElementById('causaRaiz').value,
+                accionMitigadora: document.getElementById('accionMitigadora').value,
+                responsableInvestigacion: document.getElementById('responsableInvestigacion').value,
+                responsableAccion: document.getElementById('responsableAccion').value,
+                fechaLimite: document.getElementById('fechaLimite').value,
+                fechaRegistro: new Date().toISOString()
+            };
+            
+            // Guardar en localStorage
+            let evaluaciones = JSON.parse(localStorage.getItem('evaluacionesSIGER') || '[]');
+            evaluaciones.push(evaluacion);
+            localStorage.setItem('evaluacionesSIGER', JSON.stringify(evaluaciones));
+            
+            // Mostrar mensaje de éxito
+            document.getElementById('successMsg').classList.add('show');
+            setTimeout(() => {
+                document.getElementById('successMsg').classList.remove('show');
+                document.getElementById('formCaptura').reset();
+                document.getElementById('calculoRiesgo').style.display = 'none';
+            }, 2000);
+        }
+        
+        // Establecer fecha actual como default
+        document.getElementById('fecha').valueAsDate = new Date();
+    </script>
+    <script src="/sync.js"></script>
+</body>
+</html>

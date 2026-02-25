@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGER PRO - Dashboard Demo</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-left h1 {
+            color: #1e40af;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .tab-btn {
+            padding: 12px 24px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            background: #1e40af;
+            color: white;
+            border-color: #1e40af;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .kpi-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .kpi-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        
+        .kpi-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .kpi-bajo { color: #22c55e; }
+        .kpi-medio { color: #eab308; }
+        .kpi-alto { color: #f97316; }
+        .kpi-critico { color: #dc2626; }
+        
+        .kpi-subtext {
+            color: #999;
+            font-size: 0.85em;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .chart-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #1e40af;
+            margin-bottom: 15px;
+        }
+        
+        .form-card {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #1e40af;
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid #1e40af;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-box h3 {
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+        
+        .info-box p {
+            color: #1e3a8a;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #1e40af;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1e3a8a;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #1e40af;
+            border: 2px solid #1e40af;
+        }
+        
+        .btn-secondary:hover {
+            background: #f0f9ff;
+        }
+        
+        .btn-success {
+            background: #22c55e;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #16a34a;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: #f3f4f6;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #1e40af;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        tr:hover {
+            background: #f9fafb;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .badge-bajo { background: #dcfce7; color: #166534; }
+        .badge-medio { background: #fef08a; color: #713f12; }
+        .badge-alto { background: #fed7aa; color: #92400e; }
+        .badge-critico { background: #fecaca; color: #991b1b; }
+        
+        .success-message {
+            background: #dcfce7;
+            border: 1px solid #86efac;
+            color: #166534;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        footer {
+            text-align: center;
+            color: #666;
+            margin-top: 40px;
+            padding: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .header-right {
+                margin-top: 20px;
+                justify-content: center;
+            }
+            
+            h1 { font-size: 1.8em; }
+            .charts-grid { grid-template-columns: 1fr; }
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1>🛡️ SIGER PRO</h1>
+                <p class="subtitle">Gestión de Riesgos Operacionales Aeronáuticos</p>
+            </div>
+            <div class="header-right">
+                <button class="btn-secondary" onclick="window.location.href='/'">Volver</button>
+            </div>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+            <button class="tab-btn" onclick="switchTab('nueva')">➕ Nueva Evaluación</button>
+            <button class="tab-btn" onclick="switchTab('listado')">📋 Mis Evaluaciones</button>
+        </div>
+        
+        <!-- TAB: DASHBOARD -->
+        <div id="dashboard" class="tab-content active">
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">Total Evaluaciones</div>
+                    <div class="kpi-value" id="totalEval">174</div>
+                    <div class="kpi-subtext">+12 este mes</div>
+                </div>
+                
+                <div class="kpi-card">
+                    <div class="kpi-label">Riesgo Bajo</div>
+                    <div class="kpi-value kpi-bajo" id="countBajo">17</div>
+                    <div class="kpi-subtext" id="pctBajo">9.8% del total</div>
+                </div>
+                
+                <div class="kpi-card">
+                    <div class="kpi-label">Riesgo Alto</div>
+                    <div class="kpi-value kpi-alto" id="countAlto">53</div>
+                    <div class="kpi-subtext" id="pctAlto">30.5% del total</div>
+                </div>
+                
+                <div class="kpi-card">
+                    <div class="kpi-label">Riesgo Crítico</div>
+                    <div class="kpi-value kpi-critico" id="countCritico">94</div>
+                    <div class="kpi-subtext" id="pctCritico">54.0% del total</div>
+                </div>
+            </div>
+            
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-title">📊 Distribución de Riesgos</div>
+                    <canvas id="riskChart"></canvas>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-title">📈 Tendencias Mensuales</div>
+                    <canvas id="trendsChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <div class="chart-title">📋 Evaluaciones por Tipo de Ocurrencia</div>
+                <canvas id="typeChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- TAB: NUEVA EVALUACIÓN -->
+        <div id="nueva" class="tab-content">
+            <div class="form-card">
+                <h2 style="color: #1e40af; margin-bottom: 20px;">Registrar Nueva Evaluación</h2>
+                
+                <div class="success-message" id="successMsg">
+                    ✓ Evaluación registrada exitosamente
+                </div>
+                
+                <form id="formEvaluacion" onsubmit="guardarEvaluacion(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fecha">Fecha de Reporte *</label>
+                            <input type="date" id="fecha" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="formaReporte">Forma de Reporte *</label>
+                            <select id="formaReporte" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="Verbal">Verbal</option>
+                                <option value="Escrita">Escrita</option>
+                                <option value="Sistema">Sistema</option>
+                                <option value="Email">Email</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tipoOcurrencia">Tipo de Ocurrencia *</label>
+                            <select id="tipoOcurrencia" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="Incidente">Incidente</option>
+                                <option value="Hallazgo">Hallazgo</option>
+                                <option value="Observación">Observación</option>
+                                <option value="No Conformidad">No Conformidad</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="regulacion">Regulación Aplicable *</label>
+                            <select id="regulacion" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="RAC">RAC</option>
+                                <option value="AIES-SOARG">AIES-SOARG</option>
+                                <option value="NSOAM">NSOAM</option>
+                                <option value="OACI">OACI</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="probabilidad">Probabilidad (1-4) *</label>
+                            <select id="probabilidad" required onchange="calcularRiesgo()">
+                                <option value="">Seleccionar...</option>
+                                <option value="1">1 - Remota</option>
+                                <option value="2">2 - Baja</option>
+                                <option value="3">3 - Media</option>
+                                <option value="4">4 - Alta</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="severidad">Severidad (A-E) *</label>
+                            <select id="severidad" required onchange="calcularRiesgo()">
+                                <option value="">Seleccionar...</option>
+                                <option value="A">A - Muy Baja</option>
+                                <option value="B">B - Baja</option>
+                                <option value="C">C - Media</option>
+                                <option value="D">D - Alta</option>
+                                <option value="E">E - Crítica</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="indiceRiesgo">Índice de Riesgo Inherente</label>
+                            <input type="text" id="indiceRiesgo" readonly style="background: #f3f4f6;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="clasificacion">Clasificación</label>
+                            <input type="text" id="clasificacion" readonly style="background: #f3f4f6;">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="descripcion">Descripción del Incidente *</label>
+                        <textarea id="descripcion" required placeholder="Describe detalladamente el incidente o hallazgo..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="accionMitigadora">Acción Mitigadora Propuesta</label>
+                        <textarea id="accionMitigadora" placeholder="Describe la acción propuesta para mitigar el riesgo..."></textarea>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button type="submit" class="btn-success">💾 Guardar Evaluación</button>
+                        <button type="reset" class="btn-secondary">Limpiar Formulario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- TAB: LISTADO -->
+        <div id="listado" class="tab-content">
+            <div class="form-card">
+                <h2 style="color: #1e40af; margin-bottom: 20px;">Mis Evaluaciones Registradas</h2>
+                
+                <div class="table-responsive">
+                    <table id="tablaEvaluaciones">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th>Regulación</th>
+                                <th>Riesgo</th>
+                                <th>Clasificación</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bodyTabla">
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: #999;">No hay evaluaciones registradas aún</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2025 SIGER PRO - Sistema de Gestión de Riesgos Operacionales Aeronáuticos</p>
+    </footer>
+    
+    <script>
+        // Datos iniciales (Excel 2025)
+        let evaluacionesData = {
+            excel: [
+                { tipo: 'Incidente', riesgo: 'Crítico', count: 45 },
+                { tipo: 'Hallazgo', riesgo: 'Alto', count: 89 },
+                { tipo: 'Observación', riesgo: 'Medio', count: 40 }
+            ],
+            nuevas: []
+        };
+        
+        // Cargar evaluaciones del localStorage
+        function cargarEvaluaciones() {
+            const stored = localStorage.getItem('evaluacionesSIGER');
+            if (stored) {
+                evaluacionesData.nuevas = JSON.parse(stored);
+            }
+        }
+        
+        // Guardar evaluaciones en localStorage
+        function guardarEnStorage() {
+            localStorage.setItem('evaluacionesSIGER', JSON.stringify(evaluacionesData.nuevas));
+        }
+        
+        // Cambiar de tab
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabName === 'listado') {
+                actualizarTabla();
+            }
+        }
+        
+        // Calcular riesgo inherente
+        function calcularRiesgo() {
+            const prob = parseInt(document.getElementById('probabilidad').value) || 0;
+            const sev = document.getElementById('severidad').value;
+            
+            if (prob && sev) {
+                const sevValues = { 'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5 };
+                const indice = prob * sevValues[sev];
+                
+                document.getElementById('indiceRiesgo').value = indice;
+                
+                // Clasificar
+                let clasificacion = 'Bajo';
+                if (indice >= 16) clasificacion = 'Crítico';
+                else if (indice >= 12) clasificacion = 'Alto';
+                else if (indice >= 6) clasificacion = 'Medio';
+                
+                document.getElementById('clasificacion').value = clasificacion;
+            }
+        }
+        
+        // Guardar evaluación
+        function guardarEvaluacion(event) {
+            event.preventDefault();
+            
+            const evaluacion = {
+                id: Date.now(),
+                fecha: document.getElementById('fecha').value,
+                formaReporte: document.getElementById('formaReporte').value,
+                tipoOcurrencia: document.getElementById('tipoOcurrencia').value,
+                regulacion: document.getElementById('regulacion').value,
+                probabilidad: document.getElementById('probabilidad').value,
+                severidad: document.getElementById('severidad').value,
+                indiceRiesgo: document.getElementById('indiceRiesgo').value,
+                clasificacion: document.getElementById('clasificacion').value,
+                descripcion: document.getElementById('descripcion').value,
+                accionMitigadora: document.getElementById('accionMitigadora').value
+            };
+            
+            evaluacionesData.nuevas.push(evaluacion);
+            guardarEnStorage();
+            
+            // Mostrar mensaje de éxito
+            const msg = document.getElementById('successMsg');
+            msg.classList.add('show');
+            setTimeout(() => msg.classList.remove('show'), 3000);
+            
+            // Limpiar formulario
+            document.getElementById('formEvaluacion').reset();
+            
+            // Actualizar contadores
+            actualizarContadores();
+        }
+        
+        // Actualizar tabla de evaluaciones
+        function actualizarTabla() {
+            const tbody = document.getElementById('bodyTabla');
+            
+            if (evaluacionesData.nuevas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">No hay evaluaciones registradas aún</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = evaluacionesData.nuevas.map(e => `
+                <tr>
+                    <td>${e.fecha}</td>
+                    <td>${e.tipoOcurrencia}</td>
+                    <td>${e.regulacion}</td>
+                    <td>${e.indiceRiesgo}</td>
+                    <td><span class="badge badge-${e.clasificacion.toLowerCase()}">${e.clasificacion}</span></td>
+                    <td>${e.descripcion.substring(0, 50)}...</td>
+                </tr>
+            `).join('');
+        }
+        
+        // Actualizar contadores
+        function actualizarContadores() {
+            const total = 174 + evaluacionesData.nuevas.length;
+            const criticos = 94 + evaluacionesData.nuevas.filter(e => e.clasificacion === 'Crítico').length;
+            const altos = 53 + evaluacionesData.nuevas.filter(e => e.clasificacion === 'Alto').length;
+            const bajos = 17 + evaluacionesData.nuevas.filter(e => e.clasificacion === 'Bajo').length;
+            
+            document.getElementById('totalEval').textContent = total;
+            document.getElementById('countCritico').textContent = criticos;
+            document.getElementById('countAlto').textContent = altos;
+            document.getElementById('countBajo').textContent = bajos;
+            
+            document.getElementById('pctCritico').textContent = ((criticos/total)*100).toFixed(1) + '% del total';
+            document.getElementById('pctAlto').textContent = ((altos/total)*100).toFixed(1) + '% del total';
+            document.getElementById('pctBajo').textContent = ((bajos/total)*100).toFixed(1) + '% del total';
+        }
+        
+        // Inicializar gráficos
+        function initCharts() {
+            // Risk Distribution
+            const riskCtx = document.getElementById('riskChart').getContext('2d');
+            new Chart(riskCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Bajo', 'Medio', 'Alto', 'Crítico'],
+                    datasets: [{
+                        data: [17, 10, 53, 94],
+                        backgroundColor: ['#22c55e', '#eab308', '#f97316', '#dc2626'],
+                        borderColor: 'white',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+            
+            // Trends
+            const trendsCtx = document.getElementById('trendsChart').getContext('2d');
+            new Chart(trendsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Ago', 'Sep', 'Oct', 'Nov', 'Dic', 'Ene', 'Feb'],
+                    datasets: [
+                        {
+                            label: 'Total',
+                            data: [120, 135, 148, 162, 168, 171, 174],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Críticos',
+                            data: [45, 52, 68, 78, 85, 89, 94],
+                            borderColor: '#dc2626',
+                            backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+            
+            // Type
+            const typeCtx = document.getElementById('typeChart').getContext('2d');
+            new Chart(typeCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Incidente', 'Hallazgo', 'Observación'],
+                    datasets: [{
+                        label: 'Cantidad',
+                        data: [45, 89, 40],
+                        backgroundColor: '#3b82f6',
+                        borderColor: '#1e40af',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    indexAxis: 'x',
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+        
+        // Inicializar
+        cargarEvaluaciones();
+        initCharts();
+        
+        // Establecer fecha actual como default
+        document.getElementById('fecha').valueAsDate = new Date();
+    </script>
+    <script src="/sync.js"></script>
+</body>
+</html>
