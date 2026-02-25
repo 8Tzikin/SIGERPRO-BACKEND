@@ -40,7 +40,7 @@ queryClient.getMutationCache().subscribe(event => {
 const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({
-      url: "/api/trpc",
+      url: "https://sigerpro-backend-production.up.railway.app",
       transformer: superjson,
       fetch(input, init) {
         return globalThis.fetch(input, {
