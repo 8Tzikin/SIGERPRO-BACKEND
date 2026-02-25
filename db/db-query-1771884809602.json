@@ -1,0 +1,177 @@
+{
+  "query": "DESCRIBE evaluaciones; SHOW CREATE TABLE evaluaciones;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3JSsh3viJUnHzPd.root --database ZGvVB7PagNTjsRECJgaU7z --execute DESCRIBE evaluaciones; SHOW CREATE TABLE evaluaciones;",
+  "rows": [
+    {
+      "Field": "id",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "PRI",
+      "Default": "NULL",
+      "Extra": "auto_increment"
+    },
+    {
+      "Field": "numeroReporte",
+      "Type": "varchar(100)",
+      "Null": "NO",
+      "Key": "UNI",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "fecha",
+      "Type": "timestamp",
+      "Null": "YES",
+      "Key": "MUL",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": ""
+    },
+    {
+      "Field": "formaReporte",
+      "Type": "varchar(100)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "reportadoPor",
+      "Type": "varchar(255)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "entidadOrigen",
+      "Type": "varchar(255)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "descripcion",
+      "Type": "text",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "tipoOcurrencia",
+      "Type": "varchar(100)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "regulacion",
+      "Type": "varchar(100)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "probabilidad",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "severidadId",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "impacto",
+      "Type": "int",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "riesgoInherente",
+      "Type": "int",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "clasificacionId",
+      "Type": "int",
+      "Null": "YES",
+      "Key": "MUL",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "estado",
+      "Type": "varchar(20)",
+      "Null": "YES",
+      "Key": "MUL",
+      "Default": "ABIERTO",
+      "Extra": ""
+    },
+    {
+      "Field": "creadoPor",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "fechaCreacion",
+      "Type": "timestamp",
+      "Null": "YES",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": ""
+    }
+  ],
+  "messages": [
+    "Table\tCreate Table",
+    "evaluaciones\tCREATE TABLE `evaluaciones` (",
+    "  `id` int NOT NULL AUTO_INCREMENT,",
+    "  `numeroReporte` varchar(100) NOT NULL,",
+    "  `fecha` timestamp DEFAULT CURRENT_TIMESTAMP,",
+    "  `formaReporte` varchar(100) DEFAULT NULL,",
+    "  `reportadoPor` varchar(255) DEFAULT NULL,",
+    "  `entidadOrigen` varchar(255) DEFAULT NULL,",
+    "  `descripcion` text NOT NULL,",
+    "  `tipoOcurrencia` varchar(100) DEFAULT NULL,",
+    "  `regulacion` varchar(100) DEFAULT NULL,",
+    "  `probabilidad` int NOT NULL,",
+    "  `severidadId` int NOT NULL,",
+    "  `impacto` int DEFAULT NULL,",
+    "  `riesgoInherente` int DEFAULT NULL,",
+    "  `clasificacionId` int DEFAULT NULL,",
+    "  `estado` varchar(20) DEFAULT 'ABIERTO',",
+    "  `creadoPor` int NOT NULL,",
+    "  `fechaCreacion` timestamp DEFAULT CURRENT_TIMESTAMP,",
+    "  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */,",
+    "  KEY `idx_estado` (`estado`),",
+    "  KEY `idx_fecha` (`fecha`),",
+    "  KEY `idx_clasificacion` (`clasificacionId`),",
+    "  UNIQUE KEY `numeroReporte` (`numeroReporte`),",
+    "  KEY `fk_1` (`creadoPor`),",
+    "  KEY `fk_2` (`severidadId`),",
+    "  CONSTRAINT `fk_1` FOREIGN KEY (`creadoPor`) REFERENCES `usuarios` (`id`),",
+    "  CONSTRAINT `fk_2` FOREIGN KEY (`severidadId`) REFERENCES `severidad` (`id`),",
+    "  CONSTRAINT `fk_3` FOREIGN KEY (`clasificacionId`) REFERENCES `clasificaciones` (`id`)",
+    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin AUTO_INCREMENT=30001"
+  ],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nnumeroReporte\tvarchar(100)\tNO\tUNI\tNULL\t\nfecha\ttimestamp\tYES\tMUL\tCURRENT_TIMESTAMP\t\nformaReporte\tvarchar(100)\tYES\t\tNULL\t\nreportadoPor\tvarchar(255)\tYES\t\tNULL\t\nentidadOrigen\tvarchar(255)\tYES\t\tNULL\t\ndescripcion\ttext\tNO\t\tNULL\t\ntipoOcurrencia\tvarchar(100)\tYES\t\tNULL\t\nregulacion\tvarchar(100)\tYES\t\tNULL\t\nprobabilidad\tint\tNO\t\tNULL\t\nseveridadId\tint\tNO\t\tNULL\t\nimpacto\tint\tYES\t\tNULL\t\nriesgoInherente\tint\tYES\t\tNULL\t\nclasificacionId\tint\tYES\tMUL\tNULL\t\nestado\tvarchar(20)\tYES\tMUL\tABIERTO\t\ncreadoPor\tint\tNO\t\tNULL\t\nfechaCreacion\ttimestamp\tYES\t\tCURRENT_TIMESTAMP\t\nTable\tCreate Table\nevaluaciones\tCREATE TABLE `evaluaciones` (\n  `id` int NOT NULL AUTO_INCREMENT,\n  `numeroReporte` varchar(100) NOT NULL,\n  `fecha` timestamp DEFAULT CURRENT_TIMESTAMP,\n  `formaReporte` varchar(100) DEFAULT NULL,\n  `reportadoPor` varchar(255) DEFAULT NULL,\n  `entidadOrigen` varchar(255) DEFAULT NULL,\n  `descripcion` text NOT NULL,\n  `tipoOcurrencia` varchar(100) DEFAULT NULL,\n  `regulacion` varchar(100) DEFAULT NULL,\n  `probabilidad` int NOT NULL,\n  `severidadId` int NOT NULL,\n  `impacto` int DEFAULT NULL,\n  `riesgoInherente` int DEFAULT NULL,\n  `clasificacionId` int DEFAULT NULL,\n  `estado` varchar(20) DEFAULT 'ABIERTO',\n  `creadoPor` int NOT NULL,\n  `fechaCreacion` timestamp DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */,\n  KEY `idx_estado` (`estado`),\n  KEY `idx_fecha` (`fecha`),\n  KEY `idx_clasificacion` (`clasificacionId`),\n  UNIQUE KEY `numeroReporte` (`numeroReporte`),\n  KEY `fk_1` (`creadoPor`),\n  KEY `fk_2` (`severidadId`),\n  CONSTRAINT `fk_1` FOREIGN KEY (`creadoPor`) REFERENCES `usuarios` (`id`),\n  CONSTRAINT `fk_2` FOREIGN KEY (`severidadId`) REFERENCES `severidad` (`id`),\n  CONSTRAINT `fk_3` FOREIGN KEY (`clasificacionId`) REFERENCES `clasificaciones` (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin AUTO_INCREMENT=30001\n",
+  "stderr": "",
+  "execution_time_ms": 405
+}
