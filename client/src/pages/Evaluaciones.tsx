@@ -90,7 +90,7 @@ export default function Evaluaciones() {
                   <SelectValue placeholder="Filtrar por estado" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos los estados</SelectItem>
+                  <SelectItem value="none">Todos los estados</SelectItem>
                   <SelectItem value="ABIERTO">Abierto</SelectItem>
                   <SelectItem value="CERRADO">Cerrado</SelectItem>
                   <SelectItem value="EN_REVISION">En Revisión</SelectItem>
@@ -102,7 +102,7 @@ export default function Evaluaciones() {
                   <SelectValue placeholder="Filtrar por clasificación" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas las clasificaciones</SelectItem>
+                  <SelectItem value="none">Todas las clasificaciones</SelectItem>
                   <SelectItem value="1">Bajo</SelectItem>
                   <SelectItem value="2">Medio</SelectItem>
                   <SelectItem value="3">Alto</SelectItem>
