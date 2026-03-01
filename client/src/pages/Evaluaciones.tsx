@@ -12,9 +12,9 @@ import { Plus, Search, Filter } from "lucide-react";
 export default function Evaluaciones() {
   const { user, loading } = useAuth();
   const [, setLocation] = useLocation();
-  const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
-  const [filterEstado, setFilterEstado] = useState<string | undefined>(undefined);
-  const [filterClasificacion, setFilterClasificacion] = useState<string | undefined>(undefined);
+  const [searchTerm, setSearchTerm] = useState<string>("none");
+  const [filterEstado, setFilterEstado] = useState<string>("none");
+  const [filterClasificacion, setFilterClasificacion] = useState<string>("none");
 
   // Fetch evaluaciones
   const { data: evaluaciones, isLoading } = trpc.evaluaciones.list.useQuery({
