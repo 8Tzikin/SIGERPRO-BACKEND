@@ -7,20 +7,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import { useState } from "react";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 
 export default function Evaluaciones() {
   const { user, loading } = useAuth();
   const [, setLocation] = useLocation();
-  const [searchTerm, setSearchTerm] = useState<string>("none");
+
+  // Estados corregidos
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [filterEstado, setFilterEstado] = useState<string>("none");
   const [filterClasificacion, setFilterClasificacion] = useState<string>("none");
 
-  // Fetch evaluaciones
+  // Fetch evaluaciones (ignorando "none")
   const { data: evaluaciones, isLoading } = trpc.evaluaciones.list.useQuery({
     search: searchTerm || undefined,
-    estado: filterEstado || undefined,
-    clasificacionId: filterClasificacion ? parseInt(filterClasificacion) : undefined,
+    estado: filterEstado !== "none" ? filterEstado : undefined,
+    clasificacionId:
+      filterClasificacion !== "none"
+        ? parseInt(filterClasificacion)
+        : undefined,
     limit: 100,
   });
 
@@ -60,9 +65,14 @@ export default function Evaluaciones() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Evaluaciones de Riesgos</h1>
-            <p className="text-gray-500 mt-1">Gestión de reportes de incidentes y peligros operacionales</p>
+            <p className="text-gray-500 mt-1">
+              Gestión de reportes de incidentes y peligros operacionales
+            </p>
           </div>
-          <Button onClick={() => setLocation("/evaluaciones/nueva")} className="bg-blue-600 hover:bg-blue-700 gap-2">
+          <Button
+            onClick={() => setLocation("/evaluaciones/nueva")}
+            className="bg-blue-600 hover:bg-blue-700 gap-2"
+          >
             <Plus className="w-4 h-4" />
             Nueva Evaluación
           </Button>
@@ -85,7 +95,10 @@ export default function Evaluaciones() {
                 />
               </div>
 
-              <Select value={filterEstado} onValueChange={setFilterEstado}>
+              <Select
+                value={filterEstado}
+                onValueChange={setFilterEstado}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Filtrar por estado" />
                 </SelectTrigger>
@@ -97,7 +110,10 @@ export default function Evaluaciones() {
                 </SelectContent>
               </Select>
 
-              <Select value={filterClasificacion} onValueChange={setFilterClasificacion}>
+              <Select
+                value={filterClasificacion}
+                onValueChange={setFilterClasificacion}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Filtrar por clasificación" />
                 </SelectTrigger>
@@ -142,7 +158,10 @@ export default function Evaluaciones() {
                   </thead>
                   <tbody>
                     {evaluaciones.map((evaluation: any) => (
-                      <tr key={evaluation.id} className="border-b hover:bg-gray-50 transition">
+                      <tr
+                        key={evaluation.id}
+                        className="border-b hover:bg-gray-50 transition"
+                      >
                         <td className="py-3 px-4 text-sm font-medium text-gray-900">
                           {evaluation.numeroReporte}
                         </td>
@@ -156,16 +175,26 @@ export default function Evaluaciones() {
                           {evaluation.probabilidad}
                         </td>
                         <td className="py-3 px-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getClasificacionColor(evaluation.clasificacionId)}`}>
-                            {getClasificacionLabel(evaluation.clasificacionId)}
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${getClasificacionColor(
+                              evaluation.clasificacionId
+                            )}`}
+                          >
+                            {getClasificacionLabel(
+                              evaluation.clasificacionId
+                            )}
                           </span>
                         </td>
                         <td className="py-3 px-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            evaluation.estado === "ABIERTO" ? "bg-blue-100 text-blue-800" :
-                            evaluation.estado === "CERRADO" ? "bg-green-100 text-green-800" :
-                            "bg-yellow-100 text-yellow-800"
-                          }`}>
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              evaluation.estado === "ABIERTO"
+                                ? "bg-blue-100 text-blue-800"
+                                : evaluation.estado === "CERRADO"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
+                          >
                             {evaluation.estado}
                           </span>
                         </td>
@@ -173,7 +202,9 @@ export default function Evaluaciones() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setLocation(`/evaluaciones/${evaluation.id}`)}
+                            onClick={() =>
+                              setLocation(`/evaluaciones/${evaluation.id}`)
+                            }
                           >
                             Ver
                           </Button>
@@ -185,7 +216,9 @@ export default function Evaluaciones() {
               </div>
             ) : (
               <div className="text-center py-12">
-                <p className="text-gray-500">No hay evaluaciones registradas</p>
+                <p className="text-gray-500">
+                  No hay evaluaciones registradas
+                </p>
                 <Button
                   onClick={() => setLocation("/evaluaciones/nueva")}
                   className="mt-4 bg-blue-600 hover:bg-blue-700"
