@@ -95,36 +95,7 @@ export default function Evaluaciones() {
                 />
               </div>
 
-              <Select
-                value={filterEstado}
-                onValueChange={setFilterEstado}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Filtrar por estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Todos los estados</SelectItem>
-                  <SelectItem value="ABIERTO">Abierto</SelectItem>
-                  <SelectItem value="CERRADO">Cerrado</SelectItem>
-                  <SelectItem value="EN_REVISION">En Revisión</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={filterClasificacion}
-                onValueChange={setFilterClasificacion}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Filtrar por clasificación" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Todas las clasificaciones</SelectItem>
-                  <SelectItem value="1">Bajo</SelectItem>
-                  <SelectItem value="2">Medio</SelectItem>
-                  <SelectItem value="3">Alto</SelectItem>
-                  <SelectItem value="4">Crítico</SelectItem>
-                </SelectContent>
-              </Select>
+              
             </div>
           </CardContent>
         </Card>
